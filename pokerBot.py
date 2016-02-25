@@ -37,20 +37,25 @@ def evaluateHand(hand):
     
     pairs = checkForPairs(faces)
     if pairs and (len(pairs)==2):
-        for i in pairs:
-            print str(faces[i]) +' of '+suits[i]
+#        for i in pairs:
+#            print str(faces[i]) +' of '+suits[i]
         print 'Pair'
     
     if pairs and (len(pairs)==3):
-        for i in pairs:
-            print str(faces[i]) +' of '+suits[i]
+#        for i in pairs:
+#            print str(faces[i]) +' of '+suits[i]
         print 'Three of a kind'    
                  
     if pairs and (len(pairs)==4):
-        for i in pairs:
-            print str(faces[i]) +' of '+suits[i]
-        print 'Two Pair'    
-    
+ #  	for i in pairs:
+ #           print str(faces[i]) +' of '+suits[i]
+        if (faces.count(faces[0]) == 4 or 
+		faces.count(faces[1]) == 4):
+		print 'Four of a kind'
+	else:
+		print 'Two Pair'    
+   
+
     if pairs and (len(pairs)==5):
         print 'Full House'
         for val in faces:
