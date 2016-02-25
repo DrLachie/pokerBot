@@ -11,12 +11,58 @@ def main():
     counter = 0
     while(True):
         counter+=1
-        print counter
+        #print counter
         remainingCards = generateDeck()
         hand1,remainingCards = dealHand(remainingCards)
-        evaluateHand(hand1)
-        if counter>37000:
+        hand2,remainingCards = dealHand(remainingCards)
+        compareHands(hand1,hand2)
+        if counter>100:
             break
+    
+
+def compareHands(hand1,hand2):
+    handRankings = {'Straight Flush':1,
+                    'Four of a kind':2,
+                    'Full House':3,
+                    'Flush':4,
+                    'Straight':5,
+                    'Three of a kind':6,
+                    'Two Pair':7,
+                    'One Pair':8,
+                    'High Card':9}
+    
+    hand1has = evaluateHand(hand1)
+    hand2has = evaluateHand(hand2)    
+    
+    if handRankings[hand1has] == handRankings[hand2has]:
+        splitDraw(hand1has,hand1,hand2)
+        
+    else:
+        if handRankings[hand1has] < handRankings[hand2has]:
+            print 'Hand 1 wins with %s over hand 2\'s %s' % (hand1has,hand2has)
+        else:
+            print 'Hand 2 wins with %s over hand 1\'s %s' % (hand2has,hand1has)
+    print '\n'
+    
+    
+def splitDraw(inHand,hand1,hand2):
+    hand1faces = [card[0] for card in hand1]
+    hand2faces = [card[0] for card in hand2]
+    if inHand in ['Straight Flush','Flush','Straight','High Card']:
+        high1 = highCard(hand1faces)
+        high2 = highCard(hand2faces)
+        if high1 == high2:
+            print 'Draw'
+        else:
+            if high1 > high2:
+                print 'Hand 1 wins with %s %s high over Hand 2\'s %s' % (inHand,scoreToFace(high1),
+                                                                           scoreToFace(high2))            
+            else:
+                print 'Hand 2 wins with %s %s high over Hand 1\'s %s' % (inHand,scoreToFace(high2),
+                                                                           scoreToFace(high1))
+    else:
+        print 'Still a draw, working on it'
+    
     
     
     
@@ -26,58 +72,37 @@ def evaluateHand(hand):
     readable = [str(x[0]) + ' of '+ x[1] for x in hand]
     print readable
     
-    high = highCard(faces)
-    
-    if high==14 and isStraight and np.min(faces)==2:
-        high = 5
-    
-    score_faces = {14:'ace',11:'jack',12:'queen',13:'king'}
-    if high in score_faces:
-        high = score_faces[high]    
-    
+    inHand = 'High Card'
+ 
     pairs = checkForPairs(faces)
     if pairs and (len(pairs)==2):
-#        for i in pairs:
-#            print str(faces[i]) +' of '+suits[i]
-        print 'Pair'
+        inHand = 'One Pair'
     
     if pairs and (len(pairs)==3):
-#        for i in pairs:
-#            print str(faces[i]) +' of '+suits[i]
-        print 'Three of a kind'    
+        inHand = 'Three of a kind'    
                  
     if pairs and (len(pairs)==4):
- #  	for i in pairs:
- #           print str(faces[i]) +' of '+suits[i]
         if (faces.count(faces[0]) == 4 or 
 		faces.count(faces[1]) == 4):
-		print 'Four of a kind'
+		inHand = 'Four of a kind'
 	else:
-		print 'Two Pair'    
+		inHand = 'Two Pair'    
    
 
     if pairs and (len(pairs)==5):
-        print 'Full House'
-        for val in faces:
-            if faces.count(val)==3:
-                triple = val
-            else:
-                double = val
-        print '%ss over %ss' % (triple,double)
-    
+        inHand = 'Full House'
+
     if isFlush(suits) and isStraight(faces):
-        print 'Straight flush'
-        print '%s high' % high
+        inHand = 'Straight flush'
     else:
         if isFlush(suits):
-            print 'Flush'
-            print '%s high' % high
+            inHand = 'Flush'
         
         if isStraight(faces):
-            print 'Straight'
-            print '%s high' % high
+            inHand = 'Straight'
     
     
+    return inHand
     
         
 def highCard(faces):
@@ -92,9 +117,7 @@ def highCard(faces):
     
     highCard = faceValues.index(np.max(faceValues))
     return faces[highCard]
-    
-    
-        
+           
 def isStraight(faceValues):
     
     card_scores = {'ace':14,
@@ -154,6 +177,18 @@ def generateDeck():
             deck.append((faceValue,suit))
     
     return deck
+
+def scoreToFace(cardScore):
+    card_scores = {14:'ace',
+                   11:'jack',
+                   12:'queen',
+                   13:'king'}
+    
+    if cardScore in card_scores:
+        return card_scores[cardScore]
+    else:
+        return cardScore
+    
     
     
 main()
