@@ -37,13 +37,17 @@ class Hand:
         self.faceValues = []
         self.handName = ''
         self.ranking = 0
+        self.card_scores = {'ace':14,
+                            'jack':11,
+                            'queen':12,
+                            'king':13}
         
     def dealHand(self,deck):
         for i in range(0,5):
             self.cards.append(deck.dealACard())      
         self.faces = [card[0] for card in self.cards]
         self.suits = [card[1] for card in self.cards]
-        self.convertToFaveValues()
+        self.convertHandToFaveValues()
         self.evaluateHand()  
         self.cards_readable = ['%s of %s' % (card[0], card[1]) for card in self.reordered()]
         return self
@@ -85,15 +89,16 @@ class Hand:
         self.ranking = handRankings[self.handName]
     
     
+    def convertCardToFaceValue(self,face):
+        if face in self.card_scores:
+            return self.card_scores[face]
+        else:
+            return face
     
-    def convertToFaveValues(self):
-        card_scores = {'ace':14,
-                       'jack':11,
-                       'queen':12,
-                       'king':13}
+    def convertHandToFaveValues(self):        
         for face in self.faces:
-            if face in card_scores:
-                self.faceValues.append(card_scores[face])
+            if face in self.card_scores:
+                self.faceValues.append(self.card_scores[face])
             else:
                 self.faceValues.append(face)
         
@@ -121,16 +126,16 @@ class Hand:
             return False
     
     def reordered(self):
-        cards = sorted([card for card in self.cards], key=lambda card:card[0])
+        cards = [card for (value,card) in sorted(zip(self.faceValues,self.cards))]
         return cards
         
         
 def findWinner(hand1,hand2):
     #lower is better - shutup
     if hand1.ranking < hand2.ranking:
-        return 'Hand 1 is the winner'
+        return 'Player1 is the winner'
     if hand1.ranking > hand2.ranking:
-        return 'Hand 2 is the winner'
+        return 'Player2 is the winner'
         
     if hand1.ranking == hand2.ranking:
         return evaluateDraw(hand1,hand2)
@@ -162,6 +167,7 @@ def evaluateDraw(hand1,hand2):
             if hand2.faces.count(card)>=2:
                 hand2has = card
         if hand1has == hand2has:
+            #This can't happen with three of a kind (if single deck used)
             winner = "I've decided this is a draw, both players have %ss" % hand1has
         if hand1has > hand2has:
             winner = 'Player 1 is the winner pair of %ss beats pair of %ss' % (hand1has,hand2has)
