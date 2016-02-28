@@ -6,6 +6,7 @@ Created on Sat Feb 27 08:33:52 2016
 """
 
 import numpy as np
+import re
 
 class deckofCards:
     def __init__(self):
@@ -158,6 +159,7 @@ def evaluateDraw(hand1,hand2):
                     winnerChosen = True
         if not winnerChosen:
             winner = 'Draw, identical hands'
+          
                                         
     if hand1.handName in  ['One Pair','Three of a kind']:
         for card in hand1.faces:
@@ -168,7 +170,22 @@ def evaluateDraw(hand1,hand2):
                 hand2has = card
         if hand1has == hand2has:
             #This can't happen with three of a kind (if single deck used)
-            winner = "I've decided this is a draw, both players have %ss" % hand1has
+            hand1faces = sorted(hand1.faceValues,reverse=True)
+            hand2faces = sorted(hand2.faceValues,reverse=True)            
+            winnerChosen = False        
+            for card1,card2 in zip(hand1faces,hand2faces):
+                if card1 == card2:
+                    pass
+                else:
+                    if card1 > card2 and not winnerChosen:
+                        winner = 'Player 1 wins with next highest card %s' % card1
+                        winnerChosen = True
+                    if card2 > card1 and not winnerChosen:
+                        winner = 'Player 2 wins with next highest card %s' % card2 
+                        winnerChosen = True
+            if not winnerChosen:
+                winner = 'Draw, identical hands'
+        
         if hand1has > hand2has:
             winner = 'Player 1 is the winner pair of %ss beats pair of %ss' % (hand1has,hand2has)
         if hand2has > hand1has:
@@ -197,16 +214,31 @@ def evaluateDraw(hand1,hand2):
     if hand1.handName in  ['Two Pair']: 
          hand1pairs = sorted([card for card in hand1.faceValues 
                              if hand1.faceValues.count(card)== 2],reverse=True)
-         hand2pairs = sorted([card for card in hand1.faceValues 
-                             if hand1.faceValues.count(card)== 2],reverse=True)        
+         hand2pairs = sorted([card for card in hand2.faceValues 
+                             if hand2.faceValues.count(card)== 2],reverse=True)        
 
          if hand1pairs[0] > hand2pairs[0]:
-             print 'Player 1 wins'
+             winner = 'Player 1 wins'
          if hand1pairs[0] < hand2pairs[0]:
-             print 'Player 2 wins'
+             winner = 'Player 2 wins'
          
          if hand1pairs[0] == hand2pairs[0] and hand1pairs[2]==hand2pairs[2]:
-             winner = "I've decided this is a draw, both players have pairs of %ss and %ss" % (hand1pairs[0],hand1pairs[2])
+            hand1faces = sorted(hand1.faceValues,reverse=True)
+            hand2faces = sorted(hand2.faceValues,reverse=True)            
+            winnerChosen = False        
+            for card1,card2 in zip(hand1faces,hand2faces):
+                if card1 == card2:
+                    pass
+                else:
+                    if card1 > card2 and not winnerChosen:
+                        winner = 'Player 1  wins with next highest card %s' % card1
+                        winnerChosen = True
+                    if card2 > card1 and not winnerChosen:
+                        winner = 'Player 2 wins with next highest card %s' % card2 
+                        winnerChosen = True
+            if not winnerChosen:
+                winner = 'Draw, identical hands'
+             
              
          if hand1pairs[0] == hand2pairs[0] and hand1pairs[2] > hand2pairs[2]:
              winner = 'Player 1 wins'
@@ -216,14 +248,16 @@ def evaluateDraw(hand1,hand2):
     return winner
 
 
-for i in range(0,1):
+for i in range(0,10):
     deck = deckofCards()
     player1 = Hand().dealHand(deck)
     player2 = Hand().dealHand(deck)
+    winnerString = findWinner(player1,player2) 
 
-    print player1.cards_readable
-    print player2.cards_readable
+    print 'Game: %s' % i
+    print 'Player 1 holds: ' + str(player1.cards_readable)
+    print 'Player 2 holds: ' + str(player2.cards_readable)
     print 'Player1 has %s \nPlayer2 has %s' % (player1.handName,player2.handName)
-    print findWinner(player1,player2)
-   
+    print winnerString +'\n'    
+
  
